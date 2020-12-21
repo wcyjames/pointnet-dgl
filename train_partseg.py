@@ -152,7 +152,7 @@ if args.model == 'pointnet':
 elif args.model == 'pointnet2_ssg':
     net = PointNet2SSGPartSeg(50, batch_size, input_dims=6)
 elif args.model == 'pointnet2_msg':
-    net = PointNet2MSGPartSeg(50, batch_size, input_dims=3)
+    net = PointNet2MSGPartSeg(50, batch_size, input_dims=6)
 
 net = net.to(dev)
 if args.load_model_path:

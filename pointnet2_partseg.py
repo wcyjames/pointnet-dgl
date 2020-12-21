@@ -42,12 +42,13 @@ class PointNet2SSGPartSeg(nn.Module):
         # Feature Propagation layers
         l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat)
         l1_feat = self.fp2(l1_pos, l2_pos, l1_feat, l2_feat)
-        l0_feat = self.fp1(l0_pos, l1_pos, torch.cat([cat_vec, l0_pos, l0_feat], 1), l1_feat)
+        l0_feat = torch.cat([cat_vec.permute(0, 2, 1), l0_pos, l0_feat], 2)
+        l0_feat = self.fp1(l0_pos, l1_pos, l0_feat, l1_feat)
         # FC layers
         feat = F.relu(self.bn1(self.conv1(l0_feat)))
         out = self.drop1(feat)
         out = self.conv2(out)
-        out = F.log_softmax(out, dim=1)
+        # out = F.log_softmax(out, dim=1)
         # = x.permute(0, 2, 1)
         return out
 
@@ -90,9 +91,11 @@ class PointNet2MSGPartSeg(nn.Module):
         # Feature Propagation layers
         l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat)
         l1_feat = self.fp2(l1_pos, l2_pos, l1_feat, l2_feat)
-        l0_feat = self.fp1(l0_pos, l1_pos, torch.cat([cat_vec, l0_pos, l0_feat], 1), l1_feat)
+        l0_feat = torch.cat([cat_vec.permute(0, 2, 1), l0_pos, l0_feat], 2)
+        l0_feat = self.fp1(l0_pos, l1_pos, l0_feat, l1_feat)
         # FC layers
         feat = F.relu(self.bn1(self.conv1(l0_feat)))
         out = self.drop1(feat)
         out = self.conv2(out)
+        out = F.log_softmax(out, dim=1)
         return out

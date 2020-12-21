@@ -138,23 +138,25 @@ class PointNetConv(nn.Module):
         feat_dim = h.shape[1]
         h = h.permute(0, 2, 1).reshape(-1, feat_dim)
         return {'new_feat': h}
-    
+
     def group_all(self, pos, feat):
         '''
-        Feature aggretation and pooling for the non-sampling layer
+        Feature aggregation and pooling for the non-sampling layer
         '''
         if feat is not None:
             h = torch.cat([pos, feat], 2)
         else:
             h = pos
-        shape = h.shape
-        h = h.permute(0, 2, 1).view(shape[0], shape[2], shape[1], 1)
+        B, N, D = h.shape
+        _, _, C = pos.shape
+        new_pos = torch.zeros(B, 1, C)
+        h = h.permute(0, 2, 1).view(B, -1, N, 1)
         for conv, bn in zip(self.conv, self.bn):
             h = conv(h)
             h = bn(h)
             h = F.relu(h)
-        h = torch.max(h[:, :, :, 0], 2)[0]
-        return h
+        h = torch.max(h[:, :, :, 0], 2)[0] #B,D (e.g. h.shape = 16 1024)
+        return new_pos, h
 
 class SAModule(nn.Module):
     """
@@ -183,6 +185,7 @@ class SAModule(nn.Module):
         feat_dim = g.ndata['new_feat'].shape[-1]
         pos_res = g.ndata['pos'][mask].view(self.batch_size, -1, pos_dim)
         feat_res = g.ndata['new_feat'][mask].view(self.batch_size, -1, feat_dim)
+        #pos.shape = B,N,3 feat.shape = B,N,D
         return pos_res, feat_res
 
 class SAMSGModule(nn.Module):
@@ -219,7 +222,7 @@ class SAMSGModule(nn.Module):
             feat_res_list.append(feat_res)
         feat_res = torch.cat(feat_res_list, 2)
         return pos_res, feat_res
-#TODO
+
 class PointNet2FP(nn.Module):
     def __init__(self, input_dims, sizes):
         super(PointNet2FP, self).__init__()
@@ -228,12 +231,13 @@ class PointNet2FP(nn.Module):
 
         sizes = [input_dims] + sizes
         for i in range(1, len(sizes)):
-            self.convs.append(nn.Conv2d(sizes[i-1], sizes[i], 1))
-            self.bns.append(nn.BatchNorm2d(sizes[i]))
+            self.convs.append(nn.Conv1d(sizes[i-1], sizes[i], 1))
+            self.bns.append(nn.BatchNorm1d(sizes[i]))
 
     def forward(self, x1, x2, feat1, feat2):
         B, N, C = x1.shape
         _, S, _ = x2.shape
+        feat2 = feat2.view(B, S, feat2.shape[1])
         if S == 1:
             interpolated_feat = feat2.repeat(1, N, 1)
         else:
@@ -251,6 +255,7 @@ class PointNet2FP(nn.Module):
         else:
             new_feat = interpolated_feat
 
+        new_feat = new_feat.permute(0, 2, 1) #  [B, D, S]
         for i, conv in enumerate(self.convs):
             bn = self.bns[i]
             new_feat = F.relu(bn(conv(new_feat)))
@@ -286,7 +291,7 @@ class PointNet2SSGCls(nn.Module):
             feat = None
         pos, feat = self.sa_module1(pos, feat)
         pos, feat = self.sa_module2(pos, feat)
-        h = self.sa_module3(pos, feat)
+        _, h = self.sa_module3(pos, feat)
 
         h = self.mlp1(h)
         h = self.bn1(h)
