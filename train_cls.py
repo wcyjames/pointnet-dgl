@@ -61,7 +61,6 @@ def train(net, opt, scheduler, train_loader, dev):
     loss_f = nn.CrossEntropyLoss()
     with tqdm.tqdm(train_loader, ascii=True) as tq:
         for data, label in tq:
-           # import pdb; pdb.set_trace()
             data = data.data.numpy()
             data = provider.random_point_dropout(data)
             data[:, :, 0:3] = provider.random_scale_point_cloud(data[:, :, 0:3])

@@ -27,15 +27,13 @@ class PointNet2SSGPartSeg(nn.Module):
         self.conv2 = nn.Conv1d(128, output_classes, 1)
 
     def forward(self, x, cat_vec=None):
-        # B, N, C = x.shape
-        batch_size = x.shape[0]
-        #if normal_channel
         if x.shape[-1] > 3:
             l0_pos = x[:, :, :3]
-            l0_feat = x
+            l0_feat = x[:, :, 3:]
         else:
             l0_pos = x
-            l0_feat = x
+            l0_feat = None
+        # Set Abstraction layers
         l1_pos, l1_feat = self.sa_module1(l0_pos, l0_feat)
         l2_pos, l2_feat = self.sa_module2(l1_pos, l1_feat)
         l3_pos, l3_feat = self.sa_module3(l2_pos, l2_feat)
@@ -48,8 +46,6 @@ class PointNet2SSGPartSeg(nn.Module):
         feat = F.relu(self.bn1(self.conv1(l0_feat)))
         out = self.drop1(feat)
         out = self.conv2(out)
-        # out = F.log_softmax(out, dim=1)
-        # = x.permute(0, 2, 1)
         return out
 
 
@@ -76,15 +72,13 @@ class PointNet2MSGPartSeg(nn.Module):
         self.conv2 = nn.Conv1d(128, output_classes, 1)
 
     def forward(self, x, cat_vec=None):
-        # Set Abstraction layers
-        B, N, C = x.shape
-        # if normal_channel
         if x.shape[-1] > 3:
             l0_pos = x[:, :, :3]
-            l0_feat = x
+            l0_feat = x[:, :, 3:]
         else:
             l0_pos = x
-            l0_feat = x
+            l0_feat = None
+        # Set Abstraction layers
         l1_pos, l1_feat = self.sa_msg_module1(l0_pos, l0_feat)
         l2_pos, l2_feat = self.sa_msg_module2(l1_pos, l1_feat)
         l3_pos, l3_feat = self.sa_module3(l2_pos, l2_feat)
@@ -97,5 +91,4 @@ class PointNet2MSGPartSeg(nn.Module):
         feat = F.relu(self.bn1(self.conv1(l0_feat)))
         out = self.drop1(feat)
         out = self.conv2(out)
-        out = F.log_softmax(out, dim=1)
         return out

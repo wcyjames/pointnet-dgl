@@ -155,7 +155,7 @@ class PointNetConv(nn.Module):
             h = conv(h)
             h = bn(h)
             h = F.relu(h)
-        h = torch.max(h[:, :, :, 0], 2)[0] #B,D (e.g. h.shape = 16 1024)
+        h = torch.max(h[:, :, :, 0], 2)[0] # [B,D]
         return new_pos, h
 
 class SAModule(nn.Module):
@@ -185,7 +185,6 @@ class SAModule(nn.Module):
         feat_dim = g.ndata['new_feat'].shape[-1]
         pos_res = g.ndata['pos'][mask].view(self.batch_size, -1, pos_dim)
         feat_res = g.ndata['new_feat'][mask].view(self.batch_size, -1, feat_dim)
-        #pos.shape = B,N,3 feat.shape = B,N,D
         return pos_res, feat_res
 
 class SAMSGModule(nn.Module):
@@ -255,7 +254,7 @@ class PointNet2FP(nn.Module):
         else:
             new_feat = interpolated_feat
 
-        new_feat = new_feat.permute(0, 2, 1) #  [B, D, S]
+        new_feat = new_feat.permute(0, 2, 1) # [B, D, S]
         for i, conv in enumerate(self.convs):
             bn = self.bns[i]
             new_feat = F.relu(bn(conv(new_feat)))
@@ -338,7 +337,7 @@ class PointNet2MSGCls(nn.Module):
             feat = None
         pos, feat = self.sa_msg_module1(pos, feat)
         pos, feat = self.sa_msg_module2(pos, feat)
-        h = self.sa_module3(pos, feat)
+        _, h = self.sa_module3(pos, feat)
 
         h = self.mlp1(h)
         h = self.bn1(h)
