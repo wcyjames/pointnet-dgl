@@ -29,10 +29,10 @@ class PointNet2SSGPartSeg(nn.Module):
     def forward(self, x, cat_vec=None):
         if x.shape[-1] > 3:
             l0_pos = x[:, :, :3]
-            l0_feat = x[:, :, 3:]
+            l0_feat = x
         else:
             l0_pos = x
-            l0_feat = None
+            l0_feat = x
         # Set Abstraction layers
         l1_pos, l1_feat = self.sa_module1(l0_pos, l0_feat)
         l2_pos, l2_feat = self.sa_module2(l1_pos, l1_feat)
@@ -77,7 +77,7 @@ class PointNet2MSGPartSeg(nn.Module):
             l0_feat = x[:, :, 3:]
         else:
             l0_pos = x
-            l0_feat = None
+            l0_feat = x
         # Set Abstraction layers
         l1_pos, l1_feat = self.sa_msg_module1(l0_pos, l0_feat)
         l2_pos, l2_feat = self.sa_msg_module2(l1_pos, l1_feat)
