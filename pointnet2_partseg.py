@@ -57,7 +57,7 @@ class PointNet2MSGPartSeg(nn.Module):
                                           [[input_dims, 32, 32, 64], [input_dims, 64, 64, 128],
                                            [input_dims, 64, 96, 128]])
         self.sa_msg_module2 = SAMSGModule(128, batch_size, [0.4, 0.8], [64, 128],
-                                          [[128+128+64, 128, 128, 256], [128+128+64, 128, 196, 256]])
+                                          [[128+128+64 +3, 128, 128, 256], [128+128+64 +3, 128, 196, 256]])
         self.sa_module3 = SAModule(None, batch_size, None, [512 + 3, 256, 512, 1024],
                                    group_all=True)
 
@@ -74,7 +74,7 @@ class PointNet2MSGPartSeg(nn.Module):
     def forward(self, x, cat_vec=None):
         if x.shape[-1] > 3:
             l0_pos = x[:, :, :3]
-            l0_feat = x[:, :, 3:]
+            l0_feat = x
         else:
             l0_pos = x
             l0_feat = x
