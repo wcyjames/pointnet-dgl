@@ -61,7 +61,7 @@ def paint(batched_points):
     return colored
 
 
-def train(net, opt, scheduler,  train_loader, dev):
+def train(net, opt, scheduler,  train_loader, dev, epoch):
     category_list = sorted(list(shapenet.seg_classes.keys()))
     eye_mat = np.eye(16)
     net.train()
@@ -70,6 +70,7 @@ def train(net, opt, scheduler,  train_loader, dev):
     num_batches = 0
     total_correct = 0
     count = 0
+    start = time.time()
     with tqdm.tqdm(train_loader, ascii=True) as tq:
         for batch_id, (data, label, cat) in enumerate(tq):
             # batch_size
@@ -103,9 +104,12 @@ def train(net, opt, scheduler,  train_loader, dev):
                 'AvgAcc': '%.5f' % AvgAcc})
     scheduler.step()
 
+    end = time.time()
+
     # for visualization in Tensorboard
     colored = paint(preds)
     writer.add_mesh('data', vertices=data, colors=colored, global_step=epoch)
+    writer.add_scalar('training time', end - start, global_step=epoch)
 
     return AvgLoss, AvgAcc
 
