@@ -19,8 +19,8 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets, transforms
 
 # To profile speed
-from pyinstrument import Profiler
-profiler = Profiler()
+#from pyinstrument import Profiler
+#profiler = Profiler()
 
 
 from ShapeNet import ShapeNet
@@ -77,7 +77,7 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
     count = 0
 
     start = time.time()
-    profiler.start()
+    #profiler.start()
     with tqdm.tqdm(train_loader, ascii=True) as tq:
         for batch_id, (data, label, cat) in enumerate(tq):
             # batch_size
@@ -114,9 +114,9 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
                 'AvgLoss': '%.5f' % AvgLoss,
                 'AvgAcc': '%.5f' % AvgAcc})
 
-            if batch_id == 15:
-                profiler.stop()
-                print(profiler.output_text(unicode=True, color=True))
+            #if batch_id == 15:
+            #    profiler.stop()
+             #   print(profiler.output_text(unicode=True, color=True))
     scheduler.step()
 
     end = time.time()
