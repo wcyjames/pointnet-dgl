@@ -113,7 +113,7 @@ class RelativePositionMessage(nn.Module):
         else:
             res = pos
         return {'agg_feat': res}
-# TODO
+
 class RelativePositionMessageMSG(nn.Module):
     '''
     Compute the input feature from neighbors

@@ -170,6 +170,7 @@ test_loader = CustomDataLoader(shapenet.test())
 best_test_miou = 0
 best_test_per_cat_miou = 0
 
+#res_list = []
 for epoch in range(args.num_epochs):
     train(net, opt, scheduler, train_loader, dev)
     if (epoch + 1) % 5 == 0:
@@ -182,3 +183,6 @@ for epoch in range(args.num_epochs):
                 torch.save(net.state_dict(), args.save_model_path)
         print('Current test mIoU: %.5f (best: %.5f), per-Category mIoU: %.5f (best: %.5f)' % (
                test_miou, best_test_miou, test_per_cat_miou, best_test_per_cat_miou))
+        # res_list.append([])
+
+# pd.Dataframe(res_list).to_csv('res.csv', header=None, index=False, names=[['miou', '']])
