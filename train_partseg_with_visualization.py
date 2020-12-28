@@ -18,6 +18,11 @@ import torchvision
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets, transforms
 
+# To profile speed
+from pyinstrument import Profiler
+profiler = Profiler()
+
+
 from ShapeNet import ShapeNet
 from pointnet_partseg import PointNetPartSeg, PartSegLoss
 from pointnet2_partseg import PointNet2MSGPartSeg, PointNet2SSGPartSeg
@@ -70,7 +75,9 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
     num_batches = 0
     total_correct = 0
     count = 0
+
     start = time.time()
+    profiler.start()
     with tqdm.tqdm(train_loader, ascii=True) as tq:
         for batch_id, (data, label, cat) in enumerate(tq):
             # batch_size
@@ -99,9 +106,17 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
             AvgLoss = total_loss / num_batches
             AvgAcc = total_correct / count
 
+            # For presentation
+            colored = paint(preds)
+            writer.add_mesh('data', vertices=data, colors=colored, global_step=epoch)
+
             tq.set_postfix({
                 'AvgLoss': '%.5f' % AvgLoss,
                 'AvgAcc': '%.5f' % AvgAcc})
+
+            if batch_id == 15:
+                profiler.stop()
+                print(profiler.output_text(unicode=True, color=True))
     scheduler.step()
 
     end = time.time()
@@ -209,6 +224,7 @@ writer = SummaryWriter()
 
 #res_list = []
 for epoch in range(args.num_epochs):
+
     AvgLoss, AvgAcc = train(net, opt, scheduler, train_loader, dev, epoch)
 
     writer.add_scalar('AvgLoss', AvgLoss, global_step=epoch)
