@@ -118,7 +118,7 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
             #    profiler.stop()
              #   print(profiler.output_text(unicode=True, color=True))
                 end15 = time.time()
-                print('training time for 15 batches: ', end15 - start)
+                print('training time for 15 batches: ', (end15 - start))
     scheduler.step()
 
     end = time.time()
