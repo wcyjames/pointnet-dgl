@@ -45,7 +45,7 @@ class PointNet2SSGPartSeg(nn.Module):
         # FC layers
         feat = F.relu(self.bn1(self.conv1(l0_feat)))
         out = self.drop1(feat)
-        out = self.conv2(out)
+        out = self.conv2(out) # [16, 50, 2048]
         return out
 
 
