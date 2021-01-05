@@ -19,8 +19,8 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets, transforms
 
 # To profile speed
-# from pyinstrument import Profiler
-# profiler = Profiler()
+from pyinstrument import Profiler
+profiler = Profiler()
 
 # To print model parameters
 # from torchsummary import summary
@@ -116,8 +116,8 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
                 'AvgAcc': '%.5f' % AvgAcc})
 
             if batch_id == 15:
-            #    profiler.stop()
-             #   print(profiler.output_text(unicode=True, color=True))
+                profiler.stop()
+                print(profiler.output_text(unicode=True, color=True))
                 end15 = time.time()
                 print('training time for 15 batches: ', (end15 - start))
     scheduler.step()
