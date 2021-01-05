@@ -80,7 +80,8 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
     count = 0
 
     start = time.time()
-    #profiler.start()
+    profiler.start()
+
     with tqdm.tqdm(train_loader, ascii=True) as tq:
         for batch_id, (data, label, cat) in enumerate(tq):
             # batch_size
