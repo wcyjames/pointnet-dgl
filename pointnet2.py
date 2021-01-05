@@ -250,9 +250,18 @@ class PointNet2FP(nn.Module):
             self.bns.append(nn.BatchNorm1d(sizes[i]))
 
     def forward(self, x1, x2, feat1, feat2):
+        """
+            Input:
+                x1: input points position data, [B, N, 3]
+                x2: sampled input points position data, [B, S, 3]
+                feat1: input points data, [B, N, D]
+                feat2: input points data, [B, S, D]
+            Return:
+                new_feat: upsampled points data, [B, D', N]
+        """
         B, N, C = x1.shape
         _, S, _ = x2.shape
-        feat2 = feat2.view(B, S, feat2.shape[1])
+
         if S == 1:
             interpolated_feat = feat2.repeat(1, N, 1)
         else:
@@ -270,7 +279,7 @@ class PointNet2FP(nn.Module):
         else:
             new_feat = interpolated_feat
 
-        new_feat = new_feat.permute(0, 2, 1) # [B, D, S]
+        new_feat = new_feat.permute(0, 2, 1)  # [B, D, S]
         for i, conv in enumerate(self.convs):
             bn = self.bns[i]
             new_feat = F.relu(bn(conv(new_feat)))

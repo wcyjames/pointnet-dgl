@@ -22,6 +22,9 @@ from torchvision import datasets, transforms
 #from pyinstrument import Profiler
 #profiler = Profiler()
 
+# To print model parameters
+from torchsummary import summary
+
 
 from ShapeNet import ShapeNet
 from pointnet_partseg import PointNetPartSeg, PartSegLoss
@@ -82,14 +85,16 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
         for batch_id, (data, label, cat) in enumerate(tq):
             # batch_size
             num_examples = data.shape[0]
-            data = data.to(dev, dtype=torch.float) # [B, N, 3]
+            data = data.to(dev, dtype=torch.float)  # [B, N, 3] [16, 2048, 3]
             label = label.to(dev, dtype=torch.long).view(-1)
             opt.zero_grad()
             cat_ind = [category_list.index(c) for c in cat]
             # An one-hot encoding for the object category
             cat_tensor = torch.tensor(eye_mat[cat_ind]).to(dev, dtype=torch.float).repeat(1, 2048)
-            cat_tensor = cat_tensor.view(num_examples, -1, 16).permute(0,2,1)
+            cat_tensor = cat_tensor.view(num_examples, -1, 16).permute(0,2,1)  # [B, B, N] [16, 16, 2048]
+
             logits = net(data, cat_tensor)
+
             loss = L(logits, label)
             loss.backward()
             opt.step()
@@ -106,10 +111,6 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
             AvgLoss = total_loss / num_batches
             AvgAcc = total_correct / count
 
-            # For presentation
-            colored = paint(preds)
-            writer.add_mesh('data', vertices=data, colors=colored, global_step=epoch)
-
             tq.set_postfix({
                 'AvgLoss': '%.5f' % AvgLoss,
                 'AvgAcc': '%.5f' % AvgAcc})
@@ -124,9 +125,9 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
     end = time.time()
 
     # for visualization in Tensorboard
-    colored = paint(preds)
-    writer.add_mesh('data', vertices=data, colors=colored, global_step=epoch)
-    writer.add_scalar('training time for one epoch', end - start, global_step=epoch)
+    # colored = paint(preds)
+    # writer.add_mesh('data', vertices=data, colors=colored, global_step=epoch)
+    # writer.add_scalar('training time for one epoch', end - start, global_step=epoch)
 
     return AvgLoss, AvgAcc
 
@@ -209,6 +210,11 @@ net = net.to(dev)
 if args.load_model_path:
     net.load_state_dict(torch.load(args.load_model_path, map_location=dev))
 
+
+for name, param in net.named_parameters():
+    if param.requires_grad:
+        print(name, param.data.shape)
+
 opt = optim.Adam(net.parameters(), lr=0.001, weight_decay=1e-4)
 scheduler = optim.lr_scheduler.StepLR(opt, step_size=20, gamma=0.5)
 L = PartSegLoss()
@@ -224,7 +230,8 @@ best_test_per_cat_miou = 0
 # Tensorboard
 writer = SummaryWriter()
 
-#res_list = []
+# summary(net, [(16, 2048, 3), (16,16,2048)] )
+
 for epoch in range(args.num_epochs):
 
     AvgLoss, AvgAcc = train(net, opt, scheduler, train_loader, dev, epoch)
@@ -244,6 +251,4 @@ for epoch in range(args.num_epochs):
                test_miou, best_test_miou, test_per_cat_miou, best_test_per_cat_miou))
         writer.add_scalar('test mIoU', test_miou, global_step=epoch)
         writer.add_scalar('best test mIoU', best_test_miou, global_step=epoch)
-        # res_list.append([])
 writer.close()
-# pd.Dataframe(res_list).to_csv('res.csv', header=None, index=False, names=[['miou', '']])

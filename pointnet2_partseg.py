@@ -34,14 +34,14 @@ class PointNet2SSGPartSeg(nn.Module):
             l0_pos = x
             l0_feat = x
         # Set Abstraction layers
-        l1_pos, l1_feat = self.sa_module1(l0_pos, l0_feat)
-        l2_pos, l2_feat = self.sa_module2(l1_pos, l1_feat)
-        l3_pos, l3_feat = self.sa_module3(l2_pos, l2_feat)
+        l1_pos, l1_feat = self.sa_module1(l0_pos, l0_feat)   # l1_feat: [16, 512, 128], B, N, D    N = 512
+        l2_pos, l2_feat = self.sa_module2(l1_pos, l1_feat)     # l2_feat: [16, 128, 256]     N = 128
+        l3_pos, l3_feat = self.sa_module3(l2_pos, l2_feat)  # [B, N, C], [B, D]    N = 1
         # Feature Propagation layers
-        l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat)
-        l1_feat = self.fp2(l1_pos, l2_pos, l1_feat, l2_feat)
-        l0_feat = torch.cat([cat_vec.permute(0, 2, 1), l0_pos, l0_feat], 2)
-        l0_feat = self.fp1(l0_pos, l1_pos, l0_feat, l1_feat)
+        l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat.unsqueeze(1))  # [16, 256, 128] B, D, N
+        l1_feat = self.fp2(l1_pos, l2_pos, l1_feat, l2_feat.permute(0, 2, 1))  # [16, 128, 512]
+        l0_feat = torch.cat([cat_vec.permute(0, 2, 1), l0_pos, l0_feat], 2)  # [16, 2048, 22]
+        l0_feat = self.fp1(l0_pos, l1_pos, l0_feat, l1_feat.permute(0, 2, 1))  # [16, 128, 2048]
         # FC layers
         feat = F.relu(self.bn1(self.conv1(l0_feat)))
         out = self.drop1(feat)
