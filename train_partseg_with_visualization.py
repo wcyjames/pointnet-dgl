@@ -127,7 +127,7 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
     # for visualization in Tensorboard
     # colored = paint(preds)
     # writer.add_mesh('data', vertices=data, colors=colored, global_step=epoch)
-    # writer.add_scalar('training time for one epoch', end - start, global_step=epoch)
+    writer.add_scalar('training time for one epoch', end - start, global_step=epoch)
 
     return AvgLoss, AvgAcc
 
