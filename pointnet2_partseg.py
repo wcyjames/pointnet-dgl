@@ -15,11 +15,7 @@ class PointNet2SSGPartSeg(nn.Module):
         #if normal_channel == true, input_dims = 6+3
         self.input_dims = input_dims
 
-        profiler.start()
         self.sa_module1 = SAModule(512, batch_size, 0.2, [input_dims, 64, 64, 128])
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True))
-
         self.sa_module2 = SAModule(128, batch_size, 0.4, [128 + 3, 128, 128, 256])
         self.sa_module3 = SAModule(None, batch_size, None, [256 + 3, 256, 512, 1024],
                                    group_all=True)
@@ -42,7 +38,11 @@ class PointNet2SSGPartSeg(nn.Module):
             l0_pos = x
             l0_feat = x
         # Set Abstraction layers
+        profiler.start()
         l1_pos, l1_feat = self.sa_module1(l0_pos, l0_feat)  # l1_feat: [B, N, D]
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True))
+
         l2_pos, l2_feat = self.sa_module2(l1_pos, l1_feat)
         l3_pos, l3_feat = self.sa_module3(l2_pos, l2_feat)  # [B, N, C], [B, D]
         # Feature Propagation layers
