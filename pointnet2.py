@@ -239,6 +239,9 @@ class SAMSGModule(nn.Module):
         return pos_res, feat_res
 
 class PointNet2FP(nn.Module):
+    """
+    The Feature Propagation Layer
+    """
     def __init__(self, input_dims, sizes):
         super(PointNet2FP, self).__init__()
         self.convs = nn.ModuleList()
@@ -251,9 +254,11 @@ class PointNet2FP(nn.Module):
 
     def forward(self, x1, x2, feat1, feat2):
         """
+        Adapted from https://github.com/yanx27/Pointnet_Pointnet2_pytorch
+
             Input:
-                x1: input points position data, [B, N, 3]
-                x2: sampled input points position data, [B, S, 3]
+                x1: input points position data, [B, N, C]
+                x2: sampled input points position data, [B, S, C]
                 feat1: input points data, [B, N, D]
                 feat2: input points data, [B, S, D]
             Return:

@@ -19,12 +19,8 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets, transforms
 
 # To profile speed
-from pyinstrument import Profiler
-profiler = Profiler()
-
-# To print model parameters
-# from torchsummary import summary
-
+# from pyinstrument import Profiler
+# profiler = Profiler()
 
 from ShapeNet import ShapeNet
 from pointnet_partseg import PointNetPartSeg, PartSegLoss
@@ -80,19 +76,19 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
     count = 0
 
     start = time.time()
-    profiler.start()
+    #profiler.start()
 
     with tqdm.tqdm(train_loader, ascii=True) as tq:
         for batch_id, (data, label, cat) in enumerate(tq):
             # batch_size
             num_examples = data.shape[0]
-            data = data.to(dev, dtype=torch.float)  # [B, N, 3] [16, 2048, 3]
+            data = data.to(dev, dtype=torch.float)  # [B, N, C]
             label = label.to(dev, dtype=torch.long).view(-1)
             opt.zero_grad()
             cat_ind = [category_list.index(c) for c in cat]
             # An one-hot encoding for the object category
             cat_tensor = torch.tensor(eye_mat[cat_ind]).to(dev, dtype=torch.float).repeat(1, 2048)
-            cat_tensor = cat_tensor.view(num_examples, -1, 16).permute(0,2,1)  # [B, B, N] [16, 16, 2048]
+            cat_tensor = cat_tensor.view(num_examples, -1, 16).permute(0,2,1)  # [B, B, N]
 
             logits = net(data, cat_tensor)
 
@@ -100,7 +96,7 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
             loss.backward()
             opt.step()
 
-            _, preds = logits.max(1)  # [B, 2048]
+            _, preds = logits.max(1)  # [B, N]
 
             count += num_examples * 2048
             loss = loss.item()
@@ -117,8 +113,8 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
                 'AvgAcc': '%.5f' % AvgAcc})
 
             if batch_id == 15:
-                profiler.stop()
-                print(profiler.output_text(unicode=True, color=True))
+                # profiler.stop()
+                # print(profiler.output_text(unicode=True, color=True))
                 end15 = time.time()
                 print('training time for 15 batches: ', (end15 - start))
     scheduler.step()
@@ -229,8 +225,6 @@ best_test_per_cat_miou = 0
 
 # Tensorboard
 writer = SummaryWriter()
-
-# summary(net, [(16, 2048, 3), (16,16,2048)] )
 
 for epoch in range(args.num_epochs):
 

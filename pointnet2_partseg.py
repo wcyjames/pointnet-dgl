@@ -5,13 +5,21 @@ from torch.autograd import Variable
 import numpy as np
 from pointnet2 import SAModule, SAMSGModule, PointNet2FP
 
+# To profile speed
+from pyinstrument import Profiler
+profiler = Profiler()
+
 class PointNet2SSGPartSeg(nn.Module):
     def __init__(self, output_classes, batch_size, input_dims=6):
         super(PointNet2SSGPartSeg, self).__init__()
-        #if normal_channel == true, input_dims = 6 + 3
+        #if normal_channel == true, input_dims = 6+3
         self.input_dims = input_dims
 
+        profiler.start()
         self.sa_module1 = SAModule(512, batch_size, 0.2, [input_dims, 64, 64, 128])
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True))
+
         self.sa_module2 = SAModule(128, batch_size, 0.4, [128 + 3, 128, 128, 256])
         self.sa_module3 = SAModule(None, batch_size, None, [256 + 3, 256, 512, 1024],
                                    group_all=True)
@@ -34,18 +42,18 @@ class PointNet2SSGPartSeg(nn.Module):
             l0_pos = x
             l0_feat = x
         # Set Abstraction layers
-        l1_pos, l1_feat = self.sa_module1(l0_pos, l0_feat)   # l1_feat: [16, 512, 128], B, N, D    N = 512
-        l2_pos, l2_feat = self.sa_module2(l1_pos, l1_feat)     # l2_feat: [16, 128, 256]     N = 128
-        l3_pos, l3_feat = self.sa_module3(l2_pos, l2_feat)  # [B, N, C], [B, D]    N = 1
+        l1_pos, l1_feat = self.sa_module1(l0_pos, l0_feat)  # l1_feat: [B, N, D]
+        l2_pos, l2_feat = self.sa_module2(l1_pos, l1_feat)
+        l3_pos, l3_feat = self.sa_module3(l2_pos, l2_feat)  # [B, N, C], [B, D]
         # Feature Propagation layers
-        l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat.unsqueeze(1))  # [16, 256, 128] B, D, N
-        l1_feat = self.fp2(l1_pos, l2_pos, l1_feat, l2_feat.permute(0, 2, 1))  # [16, 128, 512]
-        l0_feat = torch.cat([cat_vec.permute(0, 2, 1), l0_pos, l0_feat], 2)  # [16, 2048, 22]
-        l0_feat = self.fp1(l0_pos, l1_pos, l0_feat, l1_feat.permute(0, 2, 1))  # [16, 128, 2048]
+        l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat.unsqueeze(1))  # l2_feat = [B, D, N]
+        l1_feat = self.fp2(l1_pos, l2_pos, l1_feat, l2_feat.permute(0, 2, 1))
+        l0_feat = torch.cat([cat_vec.permute(0, 2, 1), l0_pos, l0_feat], 2)
+        l0_feat = self.fp1(l0_pos, l1_pos, l0_feat, l1_feat.permute(0, 2, 1))
         # FC layers
         feat = F.relu(self.bn1(self.conv1(l0_feat)))
         out = self.drop1(feat)
-        out = self.conv2(out) # [16, 50, 2048]
+        out = self.conv2(out)  # [B, output_classes, N]
         return out
 
 
@@ -83,10 +91,10 @@ class PointNet2MSGPartSeg(nn.Module):
         l2_pos, l2_feat = self.sa_msg_module2(l1_pos, l1_feat)
         l3_pos, l3_feat = self.sa_module3(l2_pos, l2_feat)
         # Feature Propagation layers
-        l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat)
-        l1_feat = self.fp2(l1_pos, l2_pos, l1_feat, l2_feat)
+        l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat.unsqueeze(1))
+        l1_feat = self.fp2(l1_pos, l2_pos, l1_feat, l2_feat.permute(0, 2, 1))
         l0_feat = torch.cat([cat_vec.permute(0, 2, 1), l0_pos, l0_feat], 2)
-        l0_feat = self.fp1(l0_pos, l1_pos, l0_feat, l1_feat)
+        l0_feat = self.fp1(l0_pos, l1_pos, l0_feat, l1_feat.permute(0, 2, 1))
         # FC layers
         feat = F.relu(self.bn1(self.conv1(l0_feat)))
         out = self.drop1(feat)
