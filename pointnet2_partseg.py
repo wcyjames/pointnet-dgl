@@ -44,7 +44,7 @@ class PointNet2SSGPartSeg(nn.Module):
         l2_pos, l2_feat = self.sa_module2(l1_pos, l1_feat)
         l3_pos, l3_feat = self.sa_module3(l2_pos, l2_feat)  # [B, N, C], [B, D]
         profiler.stop()
-        print(profiler.output_text(unicode=True, color=True))
+        print(profiler.output_text(unicode=True, color=True, show_all=True))
 
         # Feature Propagation layers
         l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat.unsqueeze(1))  # l2_feat = [B, D, N]
