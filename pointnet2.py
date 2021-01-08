@@ -111,20 +111,11 @@ class RelativePositionMessage(nn.Module):
         self.n_neighbor = n_neighbor
 
     def forward(self, edges):
-        # pos = edges.src['pos'] - edges.dst['pos']
-        # if 'feat' in edges.src:
-        #     res = torch.cat([pos, edges.src['feat']], 1)
-        # else:
-        #     res = pos
-        profiler.start()
-        for i in range(50):
-            pos = edges.src['pos'] - edges.dst['pos']
-            if 'feat' in edges.src:
-                res = torch.cat([pos, edges.src['feat']], 1)
-            else:
-                res = pos
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True, show_all=True))
+        pos = edges.src['pos'] - edges.dst['pos']
+        if 'feat' in edges.src:
+            res = torch.cat([pos, edges.src['feat']], 1)
+        else:
+            res = pos
         return {'agg_feat': res}
 
 class RelativePositionMessageMSG(nn.Module):
@@ -208,12 +199,12 @@ class SAModule(nn.Module):
 
         centroids = self.fps(pos)
         g = self.frnn_graph(pos, centroids, feat)
-        # profiler.start()
-        # for i in range(50):
-        #     g.update_all(self.message, fn.mean('agg_feat', 'h'))
-        # profiler.stop()
-        # print(profiler.output_text(unicode=True, color=True, show_all=True))
-        g.update_all(self.message, self.conv)
+        profiler.start()
+        for i in range(50):
+            g.update_all(self.message, fn.mean('agg_feat', 'h'))
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True, show_all=True))
+        # g.update_all(self.message, self.conv)
 
         mask = g.ndata['center'] == 1
         pos_dim = g.ndata['pos'].shape[-1]
