@@ -198,10 +198,9 @@ class SAModule(nn.Module):
             return self.conv.group_all(pos, feat)
 
         centroids = self.fps(pos)
-
+        g = self.frnn_graph(pos, centroids, feat)
         profiler.start()
         for i in range(50):
-            g = self.frnn_graph(pos, centroids, feat)
             g.update_all(self.message, self.conv)
         profiler.stop()
         print(profiler.output_text(unicode=True, color=True, show_all=True))
