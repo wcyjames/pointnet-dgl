@@ -111,11 +111,20 @@ class RelativePositionMessage(nn.Module):
         self.n_neighbor = n_neighbor
 
     def forward(self, edges):
-        pos = edges.src['pos'] - edges.dst['pos']
-        if 'feat' in edges.src:
-            res = torch.cat([pos, edges.src['feat']], 1)
-        else:
-            res = pos
+        # pos = edges.src['pos'] - edges.dst['pos']
+        # if 'feat' in edges.src:
+        #     res = torch.cat([pos, edges.src['feat']], 1)
+        # else:
+        #     res = pos
+        profiler.start()
+        for i in range(50):
+            pos = edges.src['pos'] - edges.dst['pos']
+            if 'feat' in edges.src:
+                res = torch.cat([pos, edges.src['feat']], 1)
+            else:
+                res = pos
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True, show_all=True))
         return {'agg_feat': res}
 
 class RelativePositionMessageMSG(nn.Module):
@@ -127,21 +136,11 @@ class RelativePositionMessageMSG(nn.Module):
         self.n_neighbor = n_neighbor
 
     def forward(self, edges):
-        # pos = edges.src['pos'] - edges.dst['pos']
-        # if 'feat' in edges.src:
-        #     res = torch.cat([edges.src['feat'], pos], 1)
-        # else:
-        #     res = pos
-        profiler.start()
-        for i in range(50):
-            pos = edges.src['pos'] - edges.dst['pos']
-            if 'feat' in edges.src:
-                res = torch.cat([edges.src['feat'], pos], 1)
-            else:
-                res = pos
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True, show_all=True))
-
+        pos = edges.src['pos'] - edges.dst['pos']
+        if 'feat' in edges.src:
+            res = torch.cat([edges.src['feat'], pos], 1)
+        else:
+            res = pos
         return {'agg_feat': res}
 
 class PointNetConv(nn.Module):
