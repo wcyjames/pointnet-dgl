@@ -19,8 +19,8 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets, transforms
 
 # To profile speed
-# from pyinstrument import Profiler
-# profiler = Profiler()
+from pyinstrument import Profiler
+profiler = Profiler()
 
 from ShapeNet import ShapeNet
 from pointnet_partseg import PointNetPartSeg, PartSegLoss
