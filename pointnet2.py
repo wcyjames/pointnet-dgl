@@ -7,6 +7,10 @@ import dgl
 import dgl.function as fn
 from dgl.geometry.pytorch import FarthestPointSampler
 
+# To profile speed
+from pyinstrument import Profiler
+profiler = Profiler()
+
 '''
 Part of the code are adapted from
 https://github.com/yanx27/Pointnet_Pointnet2_pytorch
@@ -171,7 +175,7 @@ class PointNetConv(nn.Module):
             h = conv(h)
             h = bn(h)
             h = F.relu(h)
-        h = torch.max(h[:, :, :, 0], 2)[0] # [B,D]
+        h = torch.max(h[:, :, :, 0], 2)[0]  # [B,D]
         return new_pos, h
 
 class SAModule(nn.Module):
@@ -194,8 +198,14 @@ class SAModule(nn.Module):
             return self.conv.group_all(pos, feat)
 
         centroids = self.fps(pos)
-        g = self.frnn_graph(pos, centroids, feat)
-        g.update_all(self.message, self.conv)
+
+        profiler.start()
+        for i in range(50):
+            g = self.frnn_graph(pos, centroids, feat)
+            g.update_all(self.message, self.conv)
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True, show_all=True))
+
         mask = g.ndata['center'] == 1
         pos_dim = g.ndata['pos'].shape[-1]
         feat_dim = g.ndata['new_feat'].shape[-1]

@@ -6,8 +6,8 @@ import numpy as np
 from pointnet2 import SAModule, SAMSGModule, PointNet2FP
 
 # To profile speed
-from pyinstrument import Profiler
-profiler = Profiler()
+# from pyinstrument import Profiler
+# profiler = Profiler()
 
 class PointNet2SSGPartSeg(nn.Module):
     def __init__(self, output_classes, batch_size, input_dims=6):
@@ -39,12 +39,12 @@ class PointNet2SSGPartSeg(nn.Module):
             l0_feat = x
         # Set Abstraction layers
 
-        profiler.start()
+        #profiler.start()
         l1_pos, l1_feat = self.sa_module1(l0_pos, l0_feat)  # l1_feat: [B, N, D]
         l2_pos, l2_feat = self.sa_module2(l1_pos, l1_feat)
         l3_pos, l3_feat = self.sa_module3(l2_pos, l2_feat)  # [B, N, C], [B, D]
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True, show_all=True))
+        #profiler.stop()
+        #print(profiler.output_text(unicode=True, color=True, show_all=True))
 
         # Feature Propagation layers
         l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat.unsqueeze(1))  # l2_feat = [B, D, N]
