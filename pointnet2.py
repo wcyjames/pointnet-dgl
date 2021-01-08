@@ -201,7 +201,8 @@ class SAModule(nn.Module):
         g = self.frnn_graph(pos, centroids, feat)
         profiler.start()
         for i in range(50):
-            g.update_all(self.message, self.conv)
+            # g.update_all(self.message, self.conv)
+            g.update_all(self.message, fn.mean('new_feat', 'h'))
         profiler.stop()
         print(profiler.output_text(unicode=True, color=True, show_all=True))
 
