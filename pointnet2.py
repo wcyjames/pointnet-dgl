@@ -139,8 +139,8 @@ class RelativePositionMessageMSG(nn.Module):
                 res = torch.cat([edges.src['feat'], pos], 1)
             else:
                 res = pos
-        # profiler.stop()
-        # print(profiler.output_text(unicode=True, color=True, show_all=True))
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True, show_all=True))
 
         return {'agg_feat': res}
 
