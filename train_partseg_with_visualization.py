@@ -19,8 +19,8 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets, transforms
 
 # To profile speed
-# from pyinstrument import Profiler
-# profiler = Profiler()
+from pyinstrument import Profiler
+profiler = Profiler()
 
 from ShapeNet import ShapeNet
 from pointnet_partseg import PointNetPartSeg, PartSegLoss
@@ -76,7 +76,7 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
     count = 0
 
     start = time.time()
-    #profiler.start()
+    profiler.start()
 
     with tqdm.tqdm(train_loader, ascii=True) as tq:
         for batch_id, (data, label, cat) in enumerate(tq):
@@ -88,7 +88,7 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
             cat_ind = [category_list.index(c) for c in cat]
             # An one-hot encoding for the object category
             cat_tensor = torch.tensor(eye_mat[cat_ind]).to(dev, dtype=torch.float).repeat(1, 2048)
-            cat_tensor = cat_tensor.view(num_examples, -1, 16).permute(0,2,1)  # [B, B, N]
+            cat_tensor = cat_tensor.view(num_examples, -1, 16).permute(0, 2, 1)  # [B, B, N]
 
             logits = net(data, cat_tensor)
 
@@ -113,8 +113,8 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
                 'AvgAcc': '%.5f' % AvgAcc})
 
             if batch_id == 15:
-                # profiler.stop()
-                # print(profiler.output_text(unicode=True, color=True))
+                profiler.stop()
+                print(profiler.output_text(unicode=True, color=True))
                 end15 = time.time()
                 print('training time for 15 batches: ', (end15 - start))
     scheduler.step()

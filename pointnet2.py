@@ -149,16 +149,22 @@ class PointNetConv(nn.Module):
 
     def forward(self, nodes):
         profiler.start()
-        for i in range(50):
-            shape = nodes.mailbox['agg_feat'].shape
-            h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
-            print(h.shape)
-            for conv, bn in zip(self.conv, self.bn):
-                h = conv(h)
-                h = bn(h)
-                h = F.relu(h)
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True, show_all=True))
+        # for i in range(50):
+        #     shape = nodes.mailbox['agg_feat'].shape
+        #     h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
+        #     print(h.shape)
+        #     for conv, bn in zip(self.conv, self.bn):
+        #         h = conv(h)
+        #         h = bn(h)
+        #         h = F.relu(h)
+        # profiler.stop()
+        # print(profiler.output_text(unicode=True, color=True, show_all=True))
+        shape = nodes.mailbox['agg_feat'].shape
+        h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
+        for conv, bn in zip(self.conv, self.bn):
+            h = conv(h)
+            h = bn(h)
+            h = F.relu(h)
         h = torch.max(h, 3)[0]
         feat_dim = h.shape[1]
         h = h.permute(0, 2, 1).reshape(-1, feat_dim)
