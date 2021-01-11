@@ -80,6 +80,7 @@ class PNConv(nn.Module):
         # h = torch.max(h, 3)[0]
         # feat_dim = h.shape[1]
         # h = h.permute(0, 2, 1).reshape(-1, feat_dim)
+        h = h.reshape(nodes.data['pos'].shape[0], -1)
         return {'new_feat': h}
 
 
