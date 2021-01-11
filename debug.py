@@ -27,7 +27,8 @@ class RPM(nn.Module):
         #     res = torch.cat([pos, edges.src['feat']], 1)
         # else:
         #     res = pos
-
+        import time
+        s = time.time()
         profiler.start()
         for i in range(50):
             pos = edges.src['pos'] - edges.dst['pos']
@@ -35,9 +36,11 @@ class RPM(nn.Module):
                 res = torch.cat([pos, edges.src['feat']], 1)
             else:
                 res = pos
+        print(time.time() - s)
         profiler.stop()
         print(profiler.output_text(unicode=True, color=True, show_all=True))
         return {'agg_feat': res}
+
 
 class PNConv(nn.Module):
     '''
@@ -53,6 +56,7 @@ class PNConv(nn.Module):
             self.bn.append(nn.BatchNorm2d(sizes[i]))
 
     def forward(self, nodes):
+
         shape = nodes.mailbox['agg_feat'].shape
         h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2) # torch.Size([16, 6, 512, 32])
         for conv, bn in zip(self.conv, self.bn):
