@@ -148,22 +148,22 @@ class PointNetConv(nn.Module):
             self.bn.append(nn.BatchNorm2d(sizes[i]))
 
     def forward(self, nodes):
-        # profiler.start()
-        # for i in range(50):
-        #     shape = nodes.mailbox['agg_feat'].shape
-        #     h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
-        #     for conv, bn in zip(self.conv, self.bn):
-        #         h = conv(h)
-        #         h = bn(h)
-        #         h = F.relu(h)
-        # profiler.stop()
-        # print(profiler.output_text(unicode=True, color=True, show_all=True))
-        shape = nodes.mailbox['agg_feat'].shape
-        h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
-        for conv, bn in zip(self.conv, self.bn):
-            h = conv(h)
-            h = bn(h)
-            h = F.relu(h)
+        profiler.start()
+        for i in range(50):
+            shape = nodes.mailbox['agg_feat'].shape
+            h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
+            for conv, bn in zip(self.conv, self.bn):
+                h = conv(h)
+                h = bn(h)
+                h = F.relu(h)
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True, show_all=True))
+        # shape = nodes.mailbox['agg_feat'].shape
+        # h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
+        # for conv, bn in zip(self.conv, self.bn):
+        #     h = conv(h)
+        #     h = bn(h)
+        #     h = F.relu(h)
         h = torch.max(h, 3)[0]
         feat_dim = h.shape[1]
         h = h.permute(0, 2, 1).reshape(-1, feat_dim)
@@ -241,7 +241,7 @@ class SAMSGModule(nn.Module):
         centroids = self.fps(pos)
         feat_res_list = []
 
-        profiler.start()
+        # profiler.start()
         for i in range(self.group_size):
             g = self.frnn_graph_list[i](pos, centroids, feat)
             g.update_all(self.message_list[i], self.conv_list[i])
@@ -254,8 +254,8 @@ class SAMSGModule(nn.Module):
             feat_res_list.append(feat_res)
         feat_res = torch.cat(feat_res_list, 2)
 
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True, show_all=True))
+        # profiler.stop()
+        # print(profiler.output_text(unicode=True, color=True, show_all=True))
         return pos_res, feat_res
 
 class PointNet2FP(nn.Module):
