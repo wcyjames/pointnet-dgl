@@ -36,9 +36,9 @@ class RPM(nn.Module):
                 res = torch.cat([pos, edges.src['feat']], 1)
             else:
                 res = pos
-        print(time.time() - s)
         profiler.stop()
         print(profiler.output_text(unicode=True, color=True, show_all=True))
+        print(time.time() - s)
         return {'agg_feat': res}
 
 
