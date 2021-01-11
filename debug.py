@@ -22,12 +22,12 @@ class RPM(nn.Module):
         self.n_neighbor = n_neighbor
 
     def forward(self, edges):
-        # pos = edges.src['pos'] - edges.dst['pos']
+        pos = edges.src['pos'] - edges.dst['pos']
         # if 'feat' in edges.src:
-        #     res = torch.cat([pos, edges.src['feat']], 1)
-        # else:
-        #     res = pos
-        res = torch.cat([edges.src['pos'], edges.src['feat']], 1)
+        if True:
+            res = torch.cat([pos, edges.src['feat']], 1)
+        else:
+            res = pos
         return {'agg_feat': res}
 
 class PNConv(nn.Module):
