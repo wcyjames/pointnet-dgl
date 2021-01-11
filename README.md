@@ -19,7 +19,7 @@ This is a reproduction of the papers
 | Model           | Dataset    | Metric   | Score |
 |-----------------|------------|----------|-------|
 | PointNet        | ShapeNet   | mIoU     | 83.6  |
-| PointNet++(SSG) | ShapeNet   | mIoU     | 79.4  |
+| PointNet++(SSG) | ShapeNet   | mIoU     | 84.5  |
 | PointNet++(MSG) | ShapeNet   | mIoU     |       |
 
 # How to Run
