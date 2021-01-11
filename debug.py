@@ -84,7 +84,7 @@ g = g.to("cuda")
 
 profiler.start()
 for i in range(50):
-    g.update_all(message, conv)
+    g.update_all(message, fn.mean('agg_feat', 'a'))
 profiler.stop()
 print(profiler.output_text(unicode=True, color=True, show_all=True))
 
