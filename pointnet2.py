@@ -149,6 +149,8 @@ class PointNetConv(nn.Module):
 
     def forward(self, nodes):
         profiler.start()
+        import time
+        s = time.time()
         for i in range(50):
             shape = nodes.mailbox['agg_feat'].shape
             h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
@@ -156,7 +158,10 @@ class PointNetConv(nn.Module):
                 h = conv(h)
                 h = bn(h)
                 h = F.relu(h)
+                if i == 2:
+                    print(time.time() - s)
         profiler.stop()
+        print(time.time() - s)
         print(profiler.output_text(unicode=True, color=True, show_all=True))
         # shape = nodes.mailbox['agg_feat'].shape
         # h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
