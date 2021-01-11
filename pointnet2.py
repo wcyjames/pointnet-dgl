@@ -164,7 +164,7 @@ class PointNetConv(nn.Module):
         #     h = conv(h)
         #     h = bn(h)
         #     h = F.relu(h)
-        # h = torch.max(h, 3)[0]
+        h = torch.max(h, 3)[0]
         feat_dim = h.shape[1]
         h = h.permute(0, 2, 1).reshape(-1, feat_dim)
         return {'new_feat': h}
