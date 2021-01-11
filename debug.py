@@ -81,9 +81,13 @@ g = glist[0]
 n_neighbor = 32
 message = RPM(n_neighbor)
 
+message = message.cuda()
+
 mlp_sizes = [6, 64, 64, 128]
 batch_size = 16
 conv = PNConv(mlp_sizes, batch_size)
+
+conv.cuda()
 
 g = g.to("cuda")
 g.update_all(message, conv)
