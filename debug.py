@@ -43,31 +43,24 @@ class PNConv(nn.Module):
             self.bn.append(nn.BatchNorm2d(sizes[i]))
 
     def forward(self, nodes):
-        # shape = nodes.mailbox['agg_feat'].shape
-        # h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2) # torch.Size([16, 6, 512, 32])
-        # for conv, bn in zip(self.conv, self.bn):
-        #     h = conv(h)
-        #     h = bn(h)
-        #     h = F.relu(h)
+        shape = nodes.mailbox['agg_feat'].shape
+        h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2) # torch.Size([16, 6, 512, 32])
+        for conv, bn in zip(self.conv, self.bn):
+            h = conv(h)
+            h = bn(h)
+            h = F.relu(h)
 
-        profiler.start()
-        import time
-        s = time.time()
-        for i in range(50):
-            shape = nodes.mailbox['agg_feat'].shape
-            h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
-            h.shape
-            for conv, bn in zip(self.conv, self.bn):
-                h = conv(h)
-                h = bn(h)
-                h = F.relu(h)
+        #profiler.start()
+        #for i in range(50):
+        #     shape = nodes.mailbox['agg_feat'].shape
+        #     h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
+        #     for conv, bn in zip(self.conv, self.bn):
+        #         h = conv(h)
+        #         h = bn(h)
+        #         h = F.relu(h)
 
-            if i == 2:
-                print("ss", time.time() - s)
-
-        profiler.stop()
-        print(time.time() - s)
-        print(profiler.output_text(unicode=True, color=True, show_all=True))
+        # profiler.stop()
+        # print(profiler.output_text(unicode=True, color=True, show_all=True))
 
         h = torch.max(h, 3)[0]
         feat_dim = h.shape[1]
@@ -81,16 +74,19 @@ g = glist[0]
 n_neighbor = 32
 message = RPM(n_neighbor)
 
-message = message.cuda()
-
 mlp_sizes = [6, 64, 64, 128]
 batch_size = 16
 conv = PNConv(mlp_sizes, batch_size)
 
+message = message.cuda()
 conv.cuda()
-
 g = g.to("cuda")
-g.update_all(message, conv)
+
+profiler.start()
+for i in range(50):
+    g.update_all(message, conv)
+profiler.stop()
+print(profiler.output_text(unicode=True, color=True, show_all=True))
 
 #print(g)
 
