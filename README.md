@@ -1,4 +1,4 @@
-PointNet and PointNet++ for Point Cloud Classification and Part Segmentation
+PointNet and PointNet++ for Point Cloud Classification and Segmentation
 ====
 
 This is a reproduction of the papers
