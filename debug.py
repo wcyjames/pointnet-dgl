@@ -22,12 +22,21 @@ class RPM(nn.Module):
         self.n_neighbor = n_neighbor
 
     def forward(self, edges):
-        pos = edges.src['pos'] - edges.dst['pos']
+        # pos = edges.src['pos'] - edges.dst['pos']
         # if 'feat' in edges.src:
-        if True:
-            res = torch.cat([pos, edges.src['feat']], 1)
-        else:
-            res = pos
+        #     res = torch.cat([pos, edges.src['feat']], 1)
+        # else:
+        #     res = pos
+
+        profiler.start()
+        for i in range(50):
+            pos = edges.src['pos'] - edges.dst['pos']
+            if 'feat' in edges.src:
+                res = torch.cat([pos, edges.src['feat']], 1)
+            else:
+                res = pos
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True, show_all=True))
         return {'agg_feat': res}
 
 class PNConv(nn.Module):
@@ -83,12 +92,12 @@ message = message.cuda()
 conv.cuda()
 g = g.to("cuda")
 
-profiler.start()
-for i in range(50):
-    g.update_all(message, conv)
+# profiler.start()
+# for i in range(50):
+g.update_all(message, conv)
     # g.update_all(message, fn.mean('agg_feat', 'a'))
-profiler.stop()
-print(profiler.output_text(unicode=True, color=True, show_all=True))
+# profiler.stop()
+# print(profiler.output_text(unicode=True, color=True, show_all=True))
 
 #print(g)
 
