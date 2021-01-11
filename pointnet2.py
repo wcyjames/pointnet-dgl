@@ -158,8 +158,8 @@ class PointNetConv(nn.Module):
                 h = conv(h)
                 h = bn(h)
                 h = F.relu(h)
-                if i == 2:
-                    print(time.time() - s)
+            if i == 2:
+                print(time.time() - s)
         profiler.stop()
         print(time.time() - s)
         print(profiler.output_text(unicode=True, color=True, show_all=True))
