@@ -44,7 +44,7 @@ class PNConv(nn.Module):
 
     def forward(self, nodes):
         # shape = nodes.mailbox['agg_feat'].shape
-        # h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
+        # h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2) # torch.Size([16, 6, 512, 32])
         # for conv, bn in zip(self.conv, self.bn):
         #     h = conv(h)
         #     h = bn(h)
@@ -53,8 +53,7 @@ class PNConv(nn.Module):
         profiler.start()
         for i in range(50):
             shape = nodes.mailbox['agg_feat'].shape
-            h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
-            print(h.shape)
+            h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2) 
             for conv, bn in zip(self.conv, self.bn):
                 h = conv(h)
                 h = bn(h)
