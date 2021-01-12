@@ -95,7 +95,7 @@ class PNConv(nn.Module):
                 h = F.relu(h)
             tmp = h[0][0][0][0].item()
 
-            h = torch.max(h, 4)[0]  # torch.Size([16, 128, 512])
+            h = torch.max(h, 2)[0]  # torch.Size([16, 128, 512])
             feat_dim = h.shape[1]  # 128
             h = h.permute(0, 2, 1).reshape(-1, feat_dim)  # torch.Size([8192, 128])
         profiler.stop()
