@@ -23,8 +23,7 @@ class RPM(nn.Module):
 
     def forward(self, edges):
         pos = edges.src['pos'] - edges.dst['pos']
-        # if 'feat' in edges.src:
-        if True:
+        if 'feat' in edges.src:
             res = torch.cat([pos, edges.src['feat']], 1)
         else:
             res = pos
@@ -64,7 +63,11 @@ class PNConv(nn.Module):
         #     h = conv(h)
         #     h = bn(h)
         #     h = F.relu(h)
-
+        #     print(h.shape)
+        #
+        # h = torch.max(h, 3)[0]
+        # feat_dim = h.shape[1]
+        # h = h.permute(0, 2, 1).reshape(-1, feat_dim)
         profiler.start()
         for i in range(50):
             shape = nodes.mailbox['agg_feat'].shape
@@ -73,8 +76,8 @@ class PNConv(nn.Module):
                 h = conv(h)
                 h = bn(h)
                 h = F.relu(h)
-            tmp = h[0][0][0][0].item()
-            print(tmp)
+            # tmp = h[0][0][0][0].item()
+            # print(tmp)
 
 
             h = torch.max(h, 3)[0]
@@ -96,9 +99,9 @@ mlp_sizes = [6, 64, 64, 128]
 batch_size = 16
 conv = PNConv(mlp_sizes, batch_size)
 
-message = message.cuda()
-conv.cuda()
-g = g.to("cuda")
+# message = message.cuda()
+# conv.cuda()
+# g = g.to("cuda")
 
 # profiler.start()
 # for i in range(50):
