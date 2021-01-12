@@ -8,8 +8,8 @@ import dgl.function as fn
 from dgl.geometry.pytorch import FarthestPointSampler
 
 # To profile speed
-from pyinstrument import Profiler
-profiler = Profiler()
+# from pyinstrument import Profiler
+# profiler = Profiler()
 
 '''
 Part of the code are adapted from
@@ -209,13 +209,12 @@ class SAModule(nn.Module):
 
         centroids = self.fps(pos)
         g = self.frnn_graph(pos, centroids, feat)
-        # dgl.save_graphs("./data2.bin", g)
-
-        profiler.start()
-        for i in range(50):
-            g.update_all(self.message, self.conv)
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True, show_all=True))
+        g.update_all(self.message, self.conv)
+        # profiler.start()
+        # for i in range(50):
+        #     g.update_all(self.message, self.conv)
+        # profiler.stop()
+        # print(profiler.output_text(unicode=True, color=True, show_all=True))
 
         mask = g.ndata['center'] == 1
         pos_dim = g.ndata['pos'].shape[-1]
