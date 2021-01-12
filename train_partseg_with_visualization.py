@@ -76,7 +76,7 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
     count = 0
 
     start = time.time()
-    profiler.start()
+    #profiler.start()
 
     with tqdm.tqdm(train_loader, ascii=True) as tq:
         for batch_id, (data, label, cat) in enumerate(tq):
@@ -115,12 +115,9 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
             # if batch_id == 15:
             #     profiler.stop()
             #     print(profiler.output_text(unicode=True, color=True, show_all=True))
-            #     end15 = time.time()
-            #     print('training time for 15 batches: ', (end15 - start))
     scheduler.step()
 
     end = time.time()
-
     # for visualization in Tensorboard
     # colored = paint(preds)
     # writer.add_mesh('data', vertices=data, colors=colored, global_step=epoch)
@@ -206,10 +203,6 @@ elif args.model == 'pointnet2_msg':
 net = net.to(dev)
 if args.load_model_path:
     net.load_state_dict(torch.load(args.load_model_path, map_location=dev))
-
-# for name, param in net.named_parameters():
-#     if param.requires_grad:
-#         print(name, param.data.shape)
 
 opt = optim.Adam(net.parameters(), lr=0.001, weight_decay=1e-4)
 scheduler = optim.lr_scheduler.StepLR(opt, step_size=20, gamma=0.5)

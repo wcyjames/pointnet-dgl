@@ -210,11 +210,6 @@ class SAModule(nn.Module):
         centroids = self.fps(pos)
         g = self.frnn_graph(pos, centroids, feat)
         g.update_all(self.message, self.conv)
-        # profiler.start()
-        # for i in range(50):
-        #     g.update_all(self.message, self.conv)
-        # profiler.stop()
-        # print(profiler.output_text(unicode=True, color=True, show_all=True))
 
         mask = g.ndata['center'] == 1
         pos_dim = g.ndata['pos'].shape[-1]
@@ -246,7 +241,6 @@ class SAMSGModule(nn.Module):
         centroids = self.fps(pos)
         feat_res_list = []
 
-        # profiler.start()
         for i in range(self.group_size):
             g = self.frnn_graph_list[i](pos, centroids, feat)
             g.update_all(self.message_list[i], self.conv_list[i])
@@ -257,10 +251,8 @@ class SAMSGModule(nn.Module):
                 pos_res = g.ndata['pos'][mask].view(self.batch_size, -1, pos_dim)
             feat_res = g.ndata['new_feat'][mask].view(self.batch_size, -1, feat_dim)
             feat_res_list.append(feat_res)
-        feat_res = torch.cat(feat_res_list, 2)
 
-        # profiler.stop()
-        # print(profiler.output_text(unicode=True, color=True, show_all=True))
+        feat_res = torch.cat(feat_res_list, 2)
         return pos_res, feat_res
 
 class PointNet2FP(nn.Module):
