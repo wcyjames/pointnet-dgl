@@ -112,7 +112,9 @@ def train(net, opt, scheduler,  train_loader, dev, epoch):
                 'AvgLoss': '%.5f' % AvgLoss,
                 'AvgAcc': '%.5f' % AvgAcc})
 
-            # if batch_id == 15:
+            if batch_id == 15:
+                end15 = time.time()
+                print('training time for 15 iterations', end15 - start)
             #     profiler.stop()
             #     print(profiler.output_text(unicode=True, color=True, show_all=True))
     scheduler.step()
