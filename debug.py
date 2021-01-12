@@ -68,26 +68,39 @@ class PNConv(nn.Module):
         # h = torch.max(h, 3)[0]
         # feat_dim = h.shape[1]
         # h = h.permute(0, 2, 1).reshape(-1, feat_dim)
+        # profiler.start()
+        # for i in range(50):
+        #     shape = nodes.mailbox['agg_feat'].shape
+        #     h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
+        #     for conv, bn in zip(self.conv, self.bn):
+        #         h = conv(h)
+        #         h = bn(h)
+        #         h = F.relu(h)
+        #     tmp = h[0][0][0][0].item()
+        #
+        #     h = torch.max(h, 3)[0]   # torch.Size([16, 128, 512])
+        #     feat_dim = h.shape[1]  # 128
+        #     h = h.permute(0, 2, 1).reshape(-1, feat_dim) # torch.Size([8192, 128])
+        # profiler.stop()
+        # print(profiler.output_text(unicode=True, color=True, show_all=True))
+        # h = h.reshape(nodes.data['pos'].shape[0], -1)
+
         profiler.start()
         for i in range(50):
             shape = nodes.mailbox['agg_feat'].shape
-            h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
+            h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 2, 1)
             for conv, bn in zip(self.conv, self.bn):
                 h = conv(h)
                 h = bn(h)
                 h = F.relu(h)
             tmp = h[0][0][0][0].item()
 
-
-            h = torch.max(h, 3)[0]
-            print(h.shape)
-            feat_dim = h.shape[1]
-            print(feat_dim)
-            h = h.permute(0, 2, 1).reshape(-1, feat_dim)
-            print(h.shape)
+            h = torch.max(h, 4)[0]  # torch.Size([16, 128, 512])
+            feat_dim = h.shape[1]  # 128
+            h = h.permute(0, 2, 1).reshape(-1, feat_dim)  # torch.Size([8192, 128])
         profiler.stop()
         print(profiler.output_text(unicode=True, color=True, show_all=True))
-        # h = h.reshape(nodes.data['pos'].shape[0], -1)
+
         return {'new_feat': h}
 
 
