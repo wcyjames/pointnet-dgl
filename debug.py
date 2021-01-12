@@ -76,8 +76,7 @@ class PNConv(nn.Module):
                 h = conv(h)
                 h = bn(h)
                 h = F.relu(h)
-            # tmp = h[0][0][0][0].item()
-            # print(tmp)
+            tmp = h[0][0][0][0].item()
 
 
             h = torch.max(h, 3)[0]
