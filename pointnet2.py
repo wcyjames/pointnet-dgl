@@ -148,25 +148,23 @@ class PointNetConv(nn.Module):
             self.bn.append(nn.BatchNorm2d(sizes[i]))
 
     def forward(self, nodes):
-        # profiler.start()
-        # for i in range(50):
-        #     shape = nodes.mailbox['agg_feat'].shape
-        #     h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
-        #     for conv, bn in zip(self.conv, self.bn):
-        #         h = conv(h)
-        #         h = bn(h)
-        #         h = F.relu(h)
-        #     if i == 2:
-        #         print(time.time() - s)
-        # profiler.stop()
-        # print(profiler.output_text(unicode=True, color=True, show_all=True))
+        # shape = nodes.mailbox['agg_feat'].shape
+        # h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
+        # for conv, bn in zip(self.conv, self.bn):
+        #     h = conv(h)
+        #     h = bn(h)
+        #     h = F.relu(h)
+        # h = torch.max(h, 3)[0]
+        # feat_dim = h.shape[1]
+        # h = h.permute(0, 2, 1).reshape(-1, feat_dim)
+
         shape = nodes.mailbox['agg_feat'].shape
-        h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
+        h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 2, 1)
         for conv, bn in zip(self.conv, self.bn):
             h = conv(h)
             h = bn(h)
             h = F.relu(h)
-        h = torch.max(h, 3)[0]
+        h = torch.max(h, 2)[0]
         feat_dim = h.shape[1]
         h = h.permute(0, 2, 1).reshape(-1, feat_dim)
         return {'new_feat': h}
