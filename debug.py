@@ -71,7 +71,7 @@ class PNConv(nn.Module):
         profiler.start()
         for i in range(50):
             shape = nodes.mailbox['agg_feat'].shape
-            h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 2, 1)
+            h = nodes.mailbox['agg_feat'].view(self.batch_size, -1, shape[1], shape[2]).permute(0, 3, 1, 2)
             for conv, bn in zip(self.conv, self.bn):
                 h = conv(h)
                 h = bn(h)
@@ -81,8 +81,11 @@ class PNConv(nn.Module):
 
 
             h = torch.max(h, 3)[0]
+            print(h.shape)
             feat_dim = h.shape[1]
+            print(feat_dim)
             h = h.permute(0, 2, 1).reshape(-1, feat_dim)
+            print(h.shape)
         profiler.stop()
         print(profiler.output_text(unicode=True, color=True, show_all=True))
         # h = h.reshape(nodes.data['pos'].shape[0], -1)
@@ -99,9 +102,9 @@ mlp_sizes = [6, 64, 64, 128]
 batch_size = 16
 conv = PNConv(mlp_sizes, batch_size)
 
-# message = message.cuda()
-# conv.cuda()
-# g = g.to("cuda")
+message = message.cuda()
+conv.cuda()
+g = g.to("cuda")
 
 # profiler.start()
 # for i in range(50):
