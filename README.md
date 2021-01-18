@@ -20,7 +20,7 @@ This is a reproduction of the papers
 |-----------------|------------|----------|-------|
 | PointNet        | ShapeNet   | mIoU     | 83.6  |
 | PointNet++(SSG) | ShapeNet   | mIoU     | 84.5  |
-| PointNet++(MSG) | ShapeNet   | mIoU     |       |
+| PointNet++(MSG) | ShapeNet   | mIoU     | 84.6  |
 
 # How to Run
 
