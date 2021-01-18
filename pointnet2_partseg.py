@@ -5,10 +5,6 @@ from torch.autograd import Variable
 import numpy as np
 from pointnet2 import SAModule, SAMSGModule, PointNet2FP
 
-# To profile speed
-# from pyinstrument import Profiler
-# profiler = Profiler()
-
 class PointNet2SSGPartSeg(nn.Module):
     def __init__(self, output_classes, batch_size, input_dims=6):
         super(PointNet2SSGPartSeg, self).__init__()
@@ -42,7 +38,7 @@ class PointNet2SSGPartSeg(nn.Module):
         l2_pos, l2_feat = self.sa_module2(l1_pos, l1_feat)
         l3_pos, l3_feat = self.sa_module3(l2_pos, l2_feat)  # [B, N, C], [B, D]
         # Feature Propagation layers
-        l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat.unsqueeze(1))  # l2_feat = [B, D, N]
+        l2_feat = self.fp3(l2_pos, l3_pos, l2_feat, l3_feat.unsqueeze(1))  # l2_feat: [B, D, N]
         l1_feat = self.fp2(l1_pos, l2_pos, l1_feat, l2_feat.permute(0, 2, 1))
         l0_feat = torch.cat([cat_vec.permute(0, 2, 1), l0_pos, l0_feat], 2)
         l0_feat = self.fp1(l0_pos, l1_pos, l0_feat, l1_feat.permute(0, 2, 1))
