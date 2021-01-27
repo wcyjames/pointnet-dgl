@@ -42,7 +42,7 @@ python train_partseg.py
 First ``pip install tensorboard``
 then run
 ```python 
-python train_partseg_with_visualization.py
+python train_partseg --tensorboard True
 ```
 To use Tensorboard, run 
 ``tensorboard --logdir=runs``
