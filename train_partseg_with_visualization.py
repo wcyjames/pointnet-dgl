@@ -61,7 +61,7 @@ def paint(batched_points):
     return colored
 
 
-def train(net, opt, scheduler,  train_loader, dev, epoch):
+def train(net, opt, scheduler, train_loader, dev, epoch):
     category_list = sorted(list(shapenet.seg_classes.keys()))
     eye_mat = np.eye(16)
     net.train()

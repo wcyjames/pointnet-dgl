@@ -41,7 +41,7 @@ CustomDataLoader = partial(
         shuffle=True,
         drop_last=True)
 
-def train(net, opt, scheduler,  train_loader, dev):
+def train(net, opt, scheduler, train_loader, dev):
     category_list = sorted(list(shapenet.seg_classes.keys()))
     eye_mat = np.eye(16)
     net.train()
