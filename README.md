@@ -11,8 +11,8 @@ This is a reproduction of the papers
 | Model           | Dataset    | Metric   | Score - PyTorch  | Score - DGL |
 |-----------------|------------|----------|------------------|-------------|
 | PointNet        | ModelNet40 | Accuracy | 89.2(Official)   | 89.3        |
-| PointNet++(SSG) | ModelNet40 | Accuracy | 92.4(With Normal)| 93.3        |
-| PointNet++(MSG) | ModelNet40 | Accuracy | 92.8(With Normal)| 93.3        |
+| PointNet++(SSG) | ModelNet40 | Accuracy | 92.4             | 93.3        |
+| PointNet++(MSG) | ModelNet40 | Accuracy | 92.8             | 93.3        |
 
 ## Part Segmentation
 
@@ -38,6 +38,7 @@ python train_partseg.py
 ```
 
 ## To Visualize Part Segmentation in Tensorboard
+![Screenshot](vis.png)
 First ``pip install tensorboard``
 then run
 ```python 
