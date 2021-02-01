@@ -149,7 +149,7 @@ for epoch in range(args.num_epochs):
     print("training time:", t)
     times.append(t)
     if epoch == 2:
-        print(sum(times)/len(times))
+        print("3 epochs avg:", sum(times)/len(times))
     if (epoch + 1) % 1 == 0:
         print('Epoch #%d Testing' % epoch)
         test_acc = evaluate(net, test_loader, dev)
