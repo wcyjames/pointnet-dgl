@@ -42,7 +42,11 @@ python train_partseg.py
 First ``pip install tensorboard``
 then run
 ```python 
+<<<<<<< HEAD
 python train_partseg.py --tensorboard
+=======
+python train_partseg --tensorboard True
+>>>>>>> ed6d961b73d52fc3b588b77d97448cb10688a878
 ```
 To display in Tensorboard, run 
 ``tensorboard --logdir=runs``
